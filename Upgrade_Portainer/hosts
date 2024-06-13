@@ -1,0 +1,8 @@
+[multipass-vms]
+10.156.122.124 ansible_ssh_host=10.156.122.124 ansible_ssh_user=vmuser ansible_ssh_private_key_file=~/ansibleplaybooks/Multipass_VMs/multipass-ssh-key
+
+[cerebro]
+192.168.1.111 ansible_ssh_host=192.168.1.111 ansible_ssh_user=hugo 
+
+[local]
+localhost ansible_connection=local

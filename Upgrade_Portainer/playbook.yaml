@@ -1,0 +1,37 @@
+---
+- name: Stop and remove Portainer container
+  hosts: cerebro
+  tasks:
+    - name: Stop Portainer container
+      become: yes
+      shell: docker stop portainer
+      ignore_errors: yes
+
+    - name: Remove Portainer container
+      become: yes
+      shell: docker container rm portainer
+      ignore_errors: yes
+
+    - name: Remove Portainer image
+      become: yes
+      shell: docker image rm portainer/portainer-ce
+      ignore_errors: yes
+
+    - name: Pull Portainer Docker image
+      docker_image:
+        name: portainer/portainer-ce:latest
+        state: present
+        source: pull
+
+    - name: Start Upgraded Portainer container
+      docker_container:
+        name: portainer
+        image: portainer/portainer-ce:latest
+        state: started
+        restart_policy: always
+        ports:
+          #- "8080:8080"
+          - "9443:9443"
+        volumes:
+          - "/var/run/docker.sock:/var/run/docker.sock"
+          - "portainer_data:/data"
