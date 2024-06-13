@@ -1,0 +1,2 @@
+[multipass-vms]
+10.156.122.124 ansible_ssh_host=10.156.122.124 ansible_ssh_user=vmuser ansible_ssh_private_key_file=multipass-ssh-key
