@@ -1,0 +1,64 @@
+---
+- name: Configure static IP on Ubuntu 24.04
+  hosts: all
+  become: yes
+
+  vars:
+    interface_name: "enp11s0"
+    static_ip: "192.168.1.222"
+    netmask: "255.255.255.0"
+    gateway: "192.168.1.1"
+    file_path: "/etc/netplan/01-netcfg.yaml"
+    file_permissions: "0600"
+    file_owner: "root"
+    file_group: "root"
+
+  tasks:
+    - name: Install netplan if not present
+      apt:
+        name: netplan.io
+        state: present
+
+    - name: Backup current netplan configuration
+      command: cp /etc/netplan/01-netcfg.yaml /etc/netplan/01-netcfg.yaml.bak
+      ignore_errors: yes
+
+    - name: Configure static IP
+      copy:
+        dest: /etc/netplan/01-netcfg.yaml
+        content: |
+          network:
+            version: 2
+            ethernets:
+              {{ interface_name }}:
+                addresses:
+                  - {{ static_ip }}/24
+                gateway4: {{ gateway }}
+                nameservers:
+                  addresses: [8.8.8.8, 8.8.4.4]
+          
+    - name: Ensure the file exists
+      stat:
+        path: "{{ file_path }}"
+      register: file_stat
+
+    - name: Change file permissions
+      file:
+        path: "{{ file_path }}"
+        mode: "{{ file_permissions }}"
+        owner: "{{ file_owner }}"
+        group: "{{ file_group }}"
+      when: file_stat.stat.exists
+
+    - name: Notify if file does not exist
+      debug:
+        msg: "The file {{ file_path }} does not exist."
+      when: not file_stat.stat.exists
+
+    - name: Apply netplan configuration
+      command: netplan apply
+
+    - name: Restart networking
+      service:
+        name: systemd-networkd
+        state: restarted
