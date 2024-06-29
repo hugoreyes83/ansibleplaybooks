@@ -1,9 +1,9 @@
 ---
 - name: Install Docker on Ubuntu 24.04
-  hosts: all
+  hosts: pinky
   become: yes
   vars:
-    username: vmuser
+    username: hugo
     groupname: docker
 
   tasks:
@@ -21,6 +21,7 @@
         - curl
         - gnupg-agent
         - software-properties-common
+        - gnupg2
 
     - name: Add Docker GPG apt key
       apt_key:
@@ -29,7 +30,7 @@
 
     - name: Add Docker repository
       apt_repository:
-        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ansible_distribution_release}} stable
         state: present
 
     - name: Update apt packages (again to refresh packages from Docker repository)
